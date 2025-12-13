@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaPay Fraud Detection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables - Dark Neon Theme */
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #242a3d;
+            --bg-input: #0f1419;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #118ab2;
+            --accent-gradient: linear-gradient(135deg, #06d6a0 0%, #118ab2 50%, #7c3aed 100%);
+            --accent-glow: rgba(6, 214, 160, 0.4);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --info: #3b82f6;
+            --border-color: rgba(148, 163, 184, 0.1);
+            --border-glow: rgba(6, 214, 160, 0.3);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--accent-glow);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s ease;
+            --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(6, 214, 160, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(17, 138, 178, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 50% 80%, rgba(124, 58, 237, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(6, 214, 160, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 214, 160, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-primary);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-secondary);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: #7c3aed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            color: var(--bg-primary);
+        }
+
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: rgba(6, 214, 160, 0.1);
+            border: 1px solid rgba(6, 214, 160, 0.2);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* Form Panel */
+        .form-panel {
+            background: rgba(26, 31, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .form-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .form-panel::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .form-panel::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .panel-header {
+            margin-bottom: 28px;
+        }
+
+        .panel-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .panel-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .section-title svg {
+            width: 22px;
+            height: 22px;
+            color: var(--accent-primary);
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+        }
+
+        /* Inputs & Selects */
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 0.95rem;
+            transition: all var(--transition-fast);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.1);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        /* Input with Icon */
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .input-with-icon input {
+            padding-left: 32px;
+        }
+
+        /* Slider */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(6, 214, 160, 0.4);
+            transition: transform var(--transition-fast);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .slider-value {
+            min-width: 48px;
+            padding: 6px 10px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            flex-direction: row !important;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-label {
+            position: relative;
+            display: block;
+            width: 52px;
+            height: 28px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle-switch input:checked + .toggle-label {
+            background: var(--accent-primary);
+        }
+
+        .toggle-switch-btn {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--transition-fast);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-label .toggle-switch-btn {
+            transform: translateX(24px);
+        }
+
+        /* Risk Indicators */
+        .risk-brackets {
+            background: rgba(6, 214, 160, 0.05);
+            border: 1px dashed rgba(6, 214, 160, 0.2) !important;
+            border-radius: var(--radius-md);
+            padding: 20px !important;
+            margin-top: 8px;
+        }
+
+        .risk-indicators {
+            display: flex;
+            gap: 16px;
+        }
+
+        .risk-indicator {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-fast);
+        }
+
+        .risk-indicator.high-risk {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-indicator.no-risk {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .indicator-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .indicator-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .risk-indicator.high-risk .indicator-value {
+            color: var(--danger);
+        }
+
+        .risk-indicator.no-risk .indicator-value {
+            color: var(--success);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px 32px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--bg-primary);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn .btn-icon svg {
+            width: 20px;
+            height: 20px;
+            transition: transform var(--transition-fast);
+        }
+
+        .submit-btn:hover .btn-icon svg {
+            transform: translateX(4px);
+        }
+
+        .submit-btn.loading .btn-text,
+        .submit-btn.loading .btn-icon {
+            opacity: 0;
+        }
+
+        .btn-loader {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(10, 14, 23, 0.3);
+            border-top-color: var(--bg-primary);
+            border-radius: 50%;
+            opacity: 0;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .submit-btn.loading .btn-loader {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: rgba(26, 31, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 24px;
+            height: fit-content;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* Results Placeholder */
+        .results-placeholder {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .placeholder-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            opacity: 0.4;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .results-placeholder h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .results-placeholder p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 280px;
+        }
+
+        /* Results Content */
+        .results-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Risk Gauge */
+        .risk-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+        }
+
+        .risk-gauge {
+            position: relative;
+            width: 200px;
+            height: 120px;
+        }
+
+        .gauge-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .gauge-fill {
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-needle {
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+
+        .gauge-value {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .risk-label {
+            margin-top: 16px;
+            padding: 8px 24px;
+            background: var(--bg-card);
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Prediction Card */
+        .prediction-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            transition: all var(--transition-base);
+        }
+
+        .prediction-card.fraud {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .prediction-card.safe {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .prediction-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .prediction-icon {
+            font-size: 2rem;
+        }
+
+        .prediction-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .prediction-action {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .prediction-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-glow);
+        }
+
+        .metric-icon {
+            font-size: 1.5rem;
+        }
+
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        /* Model Info */
+        .model-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .model-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: #a78bfa;
+            font-weight: 500;
+        }
+
+        .model-badge svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .model-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-sub {
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .results-panel {
+                position: static;
+                max-height: none;
+            }
+            .form-panel {
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            .risk-indicators {
+                flex-direction: column;
+            }
+            .form-panel,
+            .results-panel {
+                padding: 20px;
+            }
+            .panel-header h2 {
+                font-size: 1.4rem;
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-pattern"></div>
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 20L17 25L28 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="20" cy="20" r="8" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">NovaPay</span>
+                    <span class="logo-subtitle">Fraud Detection System</span>
+                </div>
+            </div>
+            <div class="header-badge">
+                <span class="pulse"></span>
+                <span>AI-Powered Analysis</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Left Panel - Transaction Form -->
+            <section class="form-panel">
+                <div class="panel-header">
+                    <h2>Transaction Analysis</h2>
+                    <p>Enter transaction details for fraud risk assessment</p>
+                </div>
+                
+                <form id="fraud-form" class="transaction-form">
+                    <!-- Geographic & Currency Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            Geographic & Currency
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="home_country">Home Country</label>
+                                <select id="home_country" name="home_country" required>
+                                    <option value="US">United States</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="UK">United Kingdom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ip_country">IP Country</label>
+                                <select id="ip_country" name="ip_country" required>
+                                    <option value="US">United States</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="UK">United Kingdom</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="source_currency">Source Currency</label>
+                                <select id="source_currency" name="source_currency" required>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="CAD">CAD - Canadian Dollar</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dest_currency">Destination Currency</label>
+                                <select id="dest_currency" name="dest_currency" required>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="CAD">CAD - Canadian Dollar</option>
+                                    <option value="MXN">MXN - Mexican Peso</option>
+                                    <option value="CNY">CNY - Chinese Yuan</option>
+                                    <option value="INR">INR - Indian Rupee</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="PHP">PHP - Philippine Peso</option>
+                                    <option value="NGN">NGN - Nigerian Naira</option>
+                                    <option value="USD">USD - US Dollar</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Details Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="18" rx="2"/>
+                                <path d="M2 9h20M9 21V9"/>
+                            </svg>
+                            Transaction Details
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="amount_src">Source Amount</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">$</span>
+                                    <input type="number" id="amount_src" name="amount_src" step="0.01" min="0" value="250.00" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="amount_usd">Amount (USD)</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">$</span>
+                                    <input type="number" id="amount_usd" name="amount_usd" step="0.01" min="0" value="250.00" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fee">Transaction Fee</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">$</span>
+                                    <input type="number" id="fee" name="fee" step="0.01" min="0" value="4.50" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exchange_rate_src_to_dest">Exchange Rate</label>
+                                <input type="number" id="exchange_rate_src_to_dest" name="exchange_rate_src_to_dest" step="0.000001" min="0" value="0.92" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="channel">Transaction Channel</label>
+                                <select id="channel" name="channel" required>
+                                    <option value="MOBILE">📱 Mobile App</option>
+                                    <option value="WEB">💻 Web Browser</option>
+                                    <option value="ATM">🏧 ATM</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="corridor_risk">Corridor Risk Score</label>
+                                <input type="number" id="corridor_risk" name="corridor_risk" step="0.01" min="0" max="1" value="0.1" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Device & Security Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                                <line x1="12" y1="18" x2="12" y2="18"/>
+                            </svg>
+                            Device & Security
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="device_trust_score">Device Trust Score</label>
+                                <div class="slider-container">
+                                    <input type="range" id="device_trust_score" name="device_trust_score" min="0" max="1" step="0.01" value="0.75">
+                                    <span class="slider-value">0.75</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ip_risk_score">IP Risk Score</label>
+                                <div class="slider-container">
+                                    <input type="range" id="ip_risk_score" name="ip_risk_score" min="0" max="1" step="0.01" value="0.2">
+                                    <span class="slider-value">0.20</span>
+                                </div>
+                            </div>
+                            <div class="form-group toggle-group">
+                                <label>New Device</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="new_device" name="new_device">
+                                    <label for="new_device" class="toggle-label">
+                                        <span class="toggle-inner"></span>
+                                        <span class="toggle-switch-btn"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group toggle-group">
+                                <label>Location Mismatch</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="location_mismatch" name="location_mismatch">
+                                    <label for="location_mismatch" class="toggle-label">
+                                        <span class="toggle-inner"></span>
+                                        <span class="toggle-switch-btn"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Profile Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Customer Profile
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="kyc_tier">KYC Tier</label>
+                                <select id="kyc_tier" name="kyc_tier" required>
+                                    <option value="STANDARD">Standard</option>
+                                    <option value="ENHANCED">Enhanced</option>
+                                    <option value="LOW">Low</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="account_age_days">Account Age (Days)</label>
+                                <input type="number" id="account_age_days" name="account_age_days" min="0" value="365" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="chargeback_history_count">Chargeback History</label>
+                                <input type="number" id="chargeback_history_count" name="chargeback_history_count" min="0" max="10" value="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="risk_score_internal">Internal Risk Score</label>
+                                <div class="slider-container">
+                                    <input type="range" id="risk_score_internal" name="risk_score_internal" min="0" max="1" step="0.01" value="0.25">
+                                    <span class="slider-value">0.25</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Velocity & Timing Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            Velocity & Timing
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="txn_velocity_1h">Transactions (1 Hour)</label>
+                                <input type="number" id="txn_velocity_1h" name="txn_velocity_1h" min="0" value="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="txn_velocity_24h">Transactions (24 Hours)</label>
+                                <input type="number" id="txn_velocity_24h" name="txn_velocity_24h" min="0" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="days_only">Day of Week</label>
+                                <select id="days_only" name="days_only" required>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="period_of_the_day">Time Period</label>
+                                <select id="period_of_the_day" name="period_of_the_day" required>
+                                    <option value="Day">🌤️ Day (6AM - 5PM)</option>
+                                    <option value="Evening">🌆 Evening (5PM - 9PM)</option>
+                                    <option value="Night">🌙 Night (12AM - 6AM)</option>
+                                    <option value="Late Night">🌃 Late Night (9PM - 12AM)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Brackets (Auto-calculated) -->
+                    <div class="form-section risk-brackets">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                            Risk Indicators (Auto-calculated)
+                        </h3>
+                        <div class="risk-indicators">
+                            <div class="risk-indicator no-risk" id="fee_bracket_indicator">
+                                <span class="indicator-label">Fee Risk</span>
+                                <span class="indicator-value" id="fee_bracket_display">No Risk</span>
+                            </div>
+                            <div class="risk-indicator no-risk" id="ip_risk_bracket_indicator">
+                                <span class="indicator-label">IP Risk</span>
+                                <span class="indicator-value" id="ip_risk_bracket_display">No Risk</span>
+                            </div>
+                            <div class="risk-indicator no-risk" id="device_trust_indicator">
+                                <span class="indicator-label">Device Trust</span>
+                                <span class="indicator-value" id="device_trust_display">No Risk</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="analyze-btn">
+                        <span class="btn-text">Analyze Transaction</span>
+                        <span class="btn-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Panel - Results -->
+            <section class="results-panel" id="results-panel">
+                <div class="results-placeholder" id="placeholder">
+                    <div class="placeholder-icon">
+                        <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="40" cy="40" r="35" opacity="0.3"/>
+                            <path d="M25 40L35 50L55 30" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="40" cy="40" r="25" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <h3>Ready to Analyze</h3>
+                    <p>Enter transaction details and click "Analyze Transaction" to get fraud risk assessment</p>
+                </div>
+
+                <div class="results-content" id="results-content" style="display: none;">
+                    <!-- Risk Gauge -->
+                    <div class="risk-gauge-container">
+                        <div class="risk-gauge">
+                            <svg viewBox="0 0 200 120" class="gauge-svg">
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#22c55e"/>
+                                        <stop offset="25%" style="stop-color:#84cc16"/>
+                                        <stop offset="50%" style="stop-color:#f59e0b"/>
+                                        <stop offset="75%" style="stop-color:#ea580c"/>
+                                        <stop offset="100%" style="stop-color:#dc2626"/>
+                                    </linearGradient>
+                                </defs>
+                                <path class="gauge-bg" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+                                <path class="gauge-fill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="url(#gaugeGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                                <circle class="gauge-needle" cx="100" cy="100" r="8" fill="#fff"/>
+                            </svg>
+                            <div class="gauge-value" id="gauge-value">0%</div>
+                        </div>
+                        <div class="risk-label" id="risk-label">ANALYZING...</div>
+                    </div>
+
+                    <!-- Prediction Result -->
+                    <div class="prediction-card" id="prediction-card">
+                        <div class="prediction-header">
+                            <span class="prediction-icon" id="prediction-icon">🔍</span>
+                            <span class="prediction-title" id="prediction-title">Prediction</span>
+                        </div>
+                        <div class="prediction-action" id="prediction-action">Analyzing transaction...</div>
+                        <div class="prediction-details" id="prediction-details">Please wait while we process your request.</div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">📊</div>
+                            <div class="metric-info">
+                                <span class="metric-label">Fraud Probability</span>
+                                <span class="metric-value" id="fraud-probability">--</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🎯</div>
+                            <div class="metric-info">
+                                <span class="metric-label">Best Threshold</span>
+                                <span class="metric-value" id="best-threshold">--</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">⚖️</div>
+                            <div class="metric-info">
+                                <span class="metric-label">Default Threshold</span>
+                                <span class="metric-value" id="default-threshold">--</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🛡️</div>
+                            <div class="metric-info">
+                                <span class="metric-label">Risk Level</span>
+                                <span class="metric-value" id="risk-level-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Info -->
+                    <div class="model-info">
+                        <div class="model-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                            <span>Random Forest Classifier</span>
+                        </div>
+                        <div class="model-stats">
+                            <span>Accuracy: 98.5%</span>
+                            <span>•</span>
+                            <span>F1-Score: 0.91</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 NovaPay Fraud Detection System • Powered by Machine Learning</p>
+            <p class="footer-sub">Random Forest Model with SMOTE Resampling • 24 Features Analyzed</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeForm();
+            initializeSliders();
+            initializeRiskIndicators();
+        });
+
+        function initializeForm() {
+            const form = document.getElementById('fraud-form');
+            const submitBtn = document.getElementById('analyze-btn');
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                
+                try {
+                    const formData = collectFormData();
+                    const result = await analyzeFraud(formData);
+                    displayResults(result);
+                } catch (error) {
+                    console.error('Error:', error);
+                    displayError(error.message);
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        function collectFormData() {
+            const form = document.getElementById('fraud-form');
+            const data = {};
+            const inputs = form.querySelectorAll('input, select');
+            
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    data[input.name] = input.checked;
+                } else if (input.type === 'range' || input.type === 'number') {
+                    data[input.name] = parseFloat(input.value) || 0;
+                } else {
+                    data[input.name] = input.value;
+                }
+            });
+            
+            data.fee_bracket = data.fee > 9998.99 ? 'high risk' : 'no risk';
+            data.ip_risk_score_bracket = data.ip_risk_score > 0.9 ? 'high risk' : 'no risk';
+            data.device_trust_bucket = data.device_trust_score < 0.3 ? 'high risk' : 'no risk';
+            
+            return data;
+        }
+
+        async function analyzeFraud(data) {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to analyze transaction');
+            }
+            return await response.json();
+        }
+
+        function displayResults(result) {
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('results-content').style.display = 'flex';
+            
+            animateGauge(result.fraud_probability);
+            
+            const riskLabel = document.getElementById('risk-label');
+            riskLabel.textContent = result.risk_level;
+            riskLabel.style.color = result.risk_color;
+            riskLabel.style.borderColor = result.risk_color;
+            
+            const predictionCard = document.getElementById('prediction-card');
+            predictionCard.className = 'prediction-card ' + (result.is_fraud_prediction ? 'fraud' : 'safe');
+            document.getElementById('prediction-icon').textContent = result.recommendation.icon;
+            document.getElementById('prediction-title').textContent = result.is_fraud_prediction ? 'Fraud Detected' : 'Transaction Safe';
+            document.getElementById('prediction-action').textContent = result.recommendation.action;
+            document.getElementById('prediction-details').textContent = result.recommendation.details;
+            
+            document.getElementById('fraud-probability').textContent = result.fraud_probability + '%';
+            document.getElementById('best-threshold').textContent = result.thresholds.best + '%';
+            document.getElementById('default-threshold').textContent = result.thresholds.default + '%';
+            document.getElementById('risk-level-value').textContent = result.risk_level;
+            document.getElementById('risk-level-value').style.color = result.risk_color;
+            
+            document.getElementById('results-content').classList.add('slide-up');
+        }
+
+        function animateGauge(probability) {
+            const gaugeValue = document.getElementById('gauge-value');
+            const gaugeFill = document.querySelector('.gauge-fill');
+            const gaugeNeedle = document.querySelector('.gauge-needle');
+            
+            const maxOffset = 251.2;
+            const offset = maxOffset - (probability / 100) * maxOffset;
+            
+            setTimeout(() => { gaugeFill.style.strokeDashoffset = offset; }, 100);
+            
+            let current = 0;
+            const interval = setInterval(() => {
+                if (current >= probability) {
+                    clearInterval(interval);
+                    return;
+                }
+                current += 1;
+                gaugeValue.textContent = current.toFixed(1) + '%';
+            }, 20);
+            
+            const angle = -90 + (probability / 100) * 180;
+            const radians = (angle * Math.PI) / 180;
+            const nx = 100 + 70 * Math.cos(radians);
+            const ny = 100 + 70 * Math.sin(radians);
+            setTimeout(() => {
+                gaugeNeedle.setAttribute('cx', nx);
+                gaugeNeedle.setAttribute('cy', ny);
+            }, 100);
+        }
+
+        function displayError(message) {
+            const placeholder = document.getElementById('placeholder');
+            placeholder.style.display = 'flex';
+            document.getElementById('results-content').style.display = 'none';
+            placeholder.innerHTML = `
+                <div class="placeholder-icon" style="color: #ef4444;">
+                    <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="40" cy="40" r="35" opacity="0.3"/>
+                        <path d="M28 28L52 52M52 28L28 52" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 style="color: #ef4444;">Error</h3>
+                <p>${message}</p>
+            `;
+        }
+
+        function initializeSliders() {
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                const valueDisplay = slider.parentElement.querySelector('.slider-value');
+                updateSliderValue(slider, valueDisplay);
+                slider.addEventListener('input', () => {
+                    updateSliderValue(slider, valueDisplay);
+                    updateRiskIndicators();
+                });
+            });
+        }
+
+        function updateSliderValue(slider, display) {
+            display.textContent = parseFloat(slider.value).toFixed(2);
+            const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+            slider.style.background = `linear-gradient(to right, #06d6a0 0%, #06d6a0 ${percent}%, #0f1419 ${percent}%, #0f1419 100%)`;
+        }
+
+        function initializeRiskIndicators() {
+            ['fee', 'ip_risk_score', 'device_trust_score'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateRiskIndicators);
+            });
+            updateRiskIndicators();
+        }
+
+        function updateRiskIndicators() {
+            const fee = parseFloat(document.getElementById('fee').value) || 0;
+            const ipRisk = parseFloat(document.getElementById('ip_risk_score').value) || 0;
+            const deviceTrust = parseFloat(document.getElementById('device_trust_score').value) || 0;
+            
+            updateIndicator('fee_bracket', fee > 9998.99);
+            updateIndicator('ip_risk_bracket', ipRisk > 0.9);
+            updateIndicator('device_trust', deviceTrust < 0.3);
+        }
+
+        function updateIndicator(id, isHighRisk) {
+            const indicator = document.getElementById(`${id}_indicator`);
+            const display = document.getElementById(`${id}_display`);
+            if (indicator && display) {
+                indicator.className = 'risk-indicator ' + (isHighRisk ? 'high-risk' : 'no-risk');
+                display.textContent = isHighRisk ? 'High Risk' : 'No Risk';
+            }
+        }
+
+        // Auto-detect location mismatch
+        ['home_country', 'ip_country'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                const mismatch = document.getElementById('home_country').value !== document.getElementById('ip_country').value;
+                document.getElementById('location_mismatch').checked = mismatch;
+            });
+        });
+    </script>
+</body>
+</html>
